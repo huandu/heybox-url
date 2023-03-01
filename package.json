@@ -29,5 +29,8 @@
   },
   "files": [
     "src"
-  ]
+  ],
+  "dependencies": {
+    "acorn": "^8.8.2"
+  }
 }
