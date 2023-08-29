@@ -8,47 +8,45 @@ const calculateDigest = (url, timestamp) => {
   return h.digest();
 };
 
-function hr(t) {
-  return lr(t) ^ t;
+function c0(v) {
+  return c1(v) ^ c2(v) ^ c3(v);
 }
 
-function dr(t) {
-  return hr(lr(t));
+function c1(v) {
+  return c2(c3(convertByte(v)));
 }
 
-function pr(t) {
-  return dr(hr(lr(t)));
+function c2(v) {
+  return c3(convertByte(v));
 }
 
-function yr(t) {
-  return pr(t) ^ dr(t) ^ hr(t);
+function c3(v) {
+  return convertByte(v) ^ v;
 }
 
-function lr(t) {
-  return 128 & t ? 255 & ((t << 1) ^ 27) : t << 1;
+function convertByte(v) {
+  return v & 0x80 ? 0xff & ((v << 1) ^ 0x1b) : v << 1;
 }
 
-export const hash = function (url, timestamp = 0) {
+export const hash = (url, timestamp = 0) => {
   timestamp ||= (Date.now() / 1000) >> 0;
 
   const { pathname } = new URL(url);
   const ts = timestamp + 1;
-  const n = '/'.concat(
+  const u =
+    '/' +
     pathname
       .split('/')
-      .filter(function (t) {
-        return t;
-      })
-      .join('/'),
-    '/'
-  );
+      .filter((t) => t)
+      .join('/') +
+    '/';
   const dict = 'BCDFGHJKMNPQRTVWXY23456789';
-  const digest = calculateDigest(n, ts);
-  const mid = 15 & digest.subarray(19, 20)[0];
+  const digest = calculateDigest(u, ts);
+  const mid = digest.subarray(19, 20)[0] & 0xf;
   let key = '';
-  let idx = 2147483647 & struct.unpack('>I', digest.subarray(mid, mid + 4))[0];
+  let idx = struct.unpack('>I', digest.subarray(mid, mid + 4))[0] & 0x7fffffff;
 
-  for (let f = 0; f < 5; f++) {
+  for (let i = 0; i < 5; i++) {
     const c = idx % dict.length;
     idx = ~~(idx / dict.length);
     key += dict[c];
@@ -57,18 +55,18 @@ export const hash = function (url, timestamp = 0) {
   const tail = key
     .slice(-4)
     .split('')
-    .map((c) => c.charCodeAt());
+    .map((c) => c.charCodeAt(0));
   let e = [0, 0, 0, 0];
-  e[0] = yr(tail[0]) ^ pr(tail[1]) ^ dr(tail[2]) ^ hr(tail[3]);
-  e[1] = hr(tail[0]) ^ yr(tail[1]) ^ pr(tail[2]) ^ dr(tail[3]);
-  e[2] = dr(tail[0]) ^ hr(tail[1]) ^ yr(tail[2]) ^ pr(tail[3]);
-  e[3] = pr(tail[0]) ^ dr(tail[1]) ^ hr(tail[2]) ^ yr(tail[3]);
+  e[0] = c0(tail[0]) ^ c1(tail[1]) ^ c2(tail[2]) ^ c3(tail[3]);
+  e[1] = c3(tail[0]) ^ c0(tail[1]) ^ c1(tail[2]) ^ c2(tail[3]);
+  e[2] = c2(tail[0]) ^ c3(tail[1]) ^ c0(tail[2]) ^ c1(tail[3]);
+  e[3] = c1(tail[0]) ^ c2(tail[1]) ^ c3(tail[2]) ^ c0(tail[3]);
   tail[0] = e[0];
   tail[1] = e[1];
   tail[2] = e[2];
   tail[3] = e[3];
 
-  const tailValue = tail.reduce((t, e) => t + e);
+  const tailValue = tail.reduce((prev, value) => prev + value);
   let suffix = (tailValue % 100).toString();
 
   if (suffix.length < 2) {
