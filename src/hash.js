@@ -42,9 +42,10 @@ export const hash = (url, timestamp = 0) => {
     '/';
   const dict = 'BCDFGHJKMNPQRTVWXY23456789';
   const digest = calculateDigest(u, ts);
-  const mid = digest.subarray(19, 20)[0] & 0xf;
+  const midIdx = digest[19] & 0xf;
   let key = '';
-  let idx = struct.unpack('>I', digest.subarray(mid, mid + 4))[0] & 0x7fffffff;
+  let idx =
+    struct.unpack('>I', digest.subarray(midIdx, midIdx + 4))[0] & 0x7fffffff;
 
   for (let i = 0; i < 5; i++) {
     const c = idx % dict.length;
@@ -73,6 +74,5 @@ export const hash = (url, timestamp = 0) => {
     suffix = '0' + suffix;
   }
 
-  const hkey = key + suffix;
-  return url + '&hkey=' + hkey + '&_time=' + timestamp;
+  return `${url}&hkey=${key}${suffix}&_time=${timestamp}`;
 };
