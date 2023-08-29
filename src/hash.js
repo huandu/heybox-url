@@ -1,5 +1,11 @@
-import { createHmac } from 'node:crypto';
+import { createHash, createHmac } from 'node:crypto';
 import struct from 'python-struct';
+
+const md5 = (str) => {
+  const h = createHash('md5');
+  h.update(str);
+  return h.digest();
+};
 
 const calculateDigest = (url, timestamp) => {
   const secret = Buffer.from(url).toString('base64');
@@ -28,8 +34,9 @@ function convertByte(v) {
   return v & 0x80 ? 0xff & ((v << 1) ^ 0x1b) : v << 1;
 }
 
-export const hash = (url, timestamp = 0) => {
+export const hash = (url, timestamp = 0, nonce = '') => {
   timestamp ||= (Date.now() / 1000) >> 0;
+  nonce ||= md5(Math.random().toString()).toString('hex').toUpperCase();
 
   const { pathname } = new URL(url);
   const ts = timestamp + 1;
@@ -40,17 +47,22 @@ export const hash = (url, timestamp = 0) => {
       .filter((t) => t)
       .join('/') +
     '/';
-  const dict = 'BCDFGHJKMNPQRTVWXY23456789';
-  const digest = calculateDigest(u, ts);
-  const midIdx = digest[19] & 0xf;
-  let key = '';
-  let idx =
-    struct.unpack('>I', digest.subarray(midIdx, midIdx + 4))[0] & 0x7fffffff;
+  const dict = 'JKMNPQRTX1234OABCDFG56789H';
 
-  for (let i = 0; i < 5; i++) {
-    const c = idx % dict.length;
-    idx = ~~(idx / dict.length);
-    key += dict[c];
+  let key = '';
+  const nonceHash = md5((nonce + dict).replace(/[^0-9]/g, ''))
+    .toString('hex')
+    .toLowerCase();
+  let rnd = md5(ts + u + nonceHash)
+    .toString('hex')
+    .replace(/[^0-9]/g, '')
+    .slice(0, 9)
+    .padEnd(9, '0');
+
+  for (let c = Number(rnd), i = 0; i < 5; i++) {
+    const u = c % dict.length;
+    c = ~~(c / dict.length);
+    key += dict[u];
   }
 
   const tail = key
@@ -74,5 +86,5 @@ export const hash = (url, timestamp = 0) => {
     suffix = '0' + suffix;
   }
 
-  return `${url}&hkey=${key}${suffix}&_time=${timestamp}`;
+  return `${url}&hkey=${key}${suffix}&_time=${timestamp}&nonce=${nonce}`;
 };
