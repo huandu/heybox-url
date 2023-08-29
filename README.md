@@ -16,7 +16,7 @@ import { calculate } from 'heybox-url';
 const url = calculate('https://api.xiaoheihe.cn/foo/bar?k1=v1&k2=v2');
 
 // hkey and _time are added in the query string.
-url === 'https://api.xiaoheihe.cn/foo/bar?k1=v1&k2=v2&hkey=DMPQ114&_time=1676275161&nonce=0RDi368qON7TBHcVILXhrh4DhbnLsJcz';
+url === 'https://api.xiaoheihe.cn/foo/bar?k1=v1&k2=v2&hkey=DMPQ114&_time=1676275161&nonce=0RDI368QON7TBHCVILXHRH4DHBNLSJCZ';
 ```
 
 ## License
