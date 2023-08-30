@@ -21,7 +21,7 @@ url === 'https://api.xiaoheihe.cn/foo/bar?k1=v1&k2=v2&hkey=KM6MP94&_time=1693395
 
 ## API
 
-````typescript
+```typescript
 const enum HKeyAlgorithm {
   Plain = 'plain', // No nonce.
   Web = 'web',
