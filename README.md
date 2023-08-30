@@ -16,7 +16,7 @@ import { calculate } from 'heybox-url';
 const url = calculate('https://api.xiaoheihe.cn/foo/bar?k1=v1&k2=v2');
 
 // hkey and _time are added in the query string.
-url === 'https://api.xiaoheihe.cn/foo/bar?k1=v1&k2=v2&hkey=DMPQ114&_time=1676275161&nonce=0RDI368QON7TBHCVILXHRH4DHBNLSJCZ';
+url === 'https://api.xiaoheihe.cn/foo/bar?k1=v1&k2=v2&hkey=KM6MP94&_time=1693395090';
 ```
 
 ## API
@@ -31,7 +31,7 @@ const enum HKeyAlgorithm {
 interface HKeyOptions {
   timestamp?: number; // Timestamp in seconds. Default to current time.
   nonce?: string; // Nonce. Default to a random string.
-  algorithm?: HKeyAlgorithm; // Algorithm. Default to HKeyAlgorithm.Web.
+  algorithm?: HKeyAlgorithm; // Algorithm. Default to 'plain'.
 }
 
 /**
