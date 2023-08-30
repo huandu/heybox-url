@@ -1,21 +1,26 @@
-import { calculate } from './index.js';
+import { HeyboxURLPrefix } from './constants.js';
+import { calculate } from './calculate.js';
 
-it('Validate hash correctness', () => {
-  const host = 'https://api.xiaoheihe.cn';
-  const ts = 1676275161;
-  const nonce = '0RDI368QON7TBHCVILXHRH4DHBNLSJCZ';
-  const urls = [
-    '/foo/bar?k1=v1&k2=v2',
-    '/foo/123/api?bar=xxx&type=mmm',
-    '/bar/xxxx/gogo?client=zzzz&sort=1&app=heybox',
-  ];
-  const expected = [
-    `https://api.xiaoheihe.cn/foo/bar?k1=v1&k2=v2&hkey=DMPQ114&_time=${ts}&nonce=${nonce}`,
-    `https://api.xiaoheihe.cn/foo/123/api?bar=xxx&type=mmm&hkey=GT1N296&_time=${ts}&nonce=${nonce}`,
-    `https://api.xiaoheihe.cn/bar/xxxx/gogo?client=zzzz&sort=1&app=heybox&hkey=R9FNG20&_time=${ts}&nonce=${nonce}`,
-  ];
+it('Validate public api correctness', () => {
+  const host = HeyboxURLPrefix;
+  const ts = 1699999990;
+  const nonce = '37FBC69BA28C6791605F5E0D96F01141';
 
-  urls.forEach((url, idx) => {
-    expect(calculate(`${host}${url}`, ts, nonce)).toBe(expected[idx]);
-  });
+  // Test plain algorithm with all kinds of different url format.
+  {
+    const pathname = 'foo/bar';
+    const query = 'k1=v1&k2=v2';
+    const hash = `hkey=JXDQP48&_time=${ts}`;
+    expect(calculate(`${host}${pathname}?${query}`, { timestamp: ts })).toBe(
+      `${host}${pathname}?${query}&${hash}`
+    );
+    expect(calculate(`${host}${pathname}`, { timestamp: ts })).toBe(
+      `${host}${pathname}?${hash}`
+    );
+    expect(calculate(`${host}${pathname}/`, { timestamp: ts })).toBe(
+      `${host}${pathname}/?${hash}`
+    );
+  }
+
+  expect(() => calculate(`https://foo.bar.com/a`)).toThrowError();
 });
