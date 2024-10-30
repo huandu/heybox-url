@@ -1,5 +1,7 @@
 # Calculate Heybox URL Hash
 
+> Deprecated: This package doesn't work with latest Heybox API. Don't use this package any more as there are no further plans to fix known issues.
+
 [Heybox](https://www.xiaoheihe.cn/) is a famous Chinese gamer community. There are lots of useful articles and game reviews on this site. To protect their valuable assets, Heybox uses relatively complex anti-crawler algorithm to sign every request. They really do a great job on this algorithm, so I spend some time to study how it works and publish this package as a way to share my learnings to everyone.
 
 In this package, only `hkey` hash algorithm is published by `calculate(url)`. It's not enough to use this hash to fetch any Heybox's API, which requires more hashes and per-request nonce for every API call. So I think it may be OK to make this package public available on NPM.
